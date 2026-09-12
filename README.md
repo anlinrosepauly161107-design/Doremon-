@@ -2,60 +2,135 @@
 
 
 
-# [Project Name] 🎯
+# [Fluffville] 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: [Doremon]
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: [Angelina Biju] - [Christ College of Engineering]
+- Member 2: [Anlin Rose Pauly] - [Christ College of Engineering]
+  
 
 ### Project Description
-[2-3 lines about what your project does]
+[Cute fluffy animal game to waste your time]
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+[Boredom]
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+[Selecting your pet and simply tapping the screen]
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- [Vanilla JavaScript]
+- [None]
+- [None]
+- [Visual Studio Code, Web Browser, HTML5 DOM APIs, Web Audio API, CSS animations and keyframes, Inline SVG, Google Fonts, Git]
 
 For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+- [None]
+- [None]
+- [None]
 
 ### Implementation
 For Software:
+Fluffville is implemented as a self-contained HTML5 browser game.
+
+- HTML5 is used for the page structure and game screens.
+- CSS3 is used for layout, colors, gradients, responsive design, transitions, and animations.
+- Vanilla JavaScript manages the game state, screen navigation, player name, companion selection, interactions, timers, and sound effects.
+- Inline SVG is used to create the animal sprites and companion backgrounds.
+- CSS keyframe animations create the character movements, eating actions, sparkles, clouds, and scene effects.
+- The Web Audio API generates sound effects without requiring audio files.
+- The DOM API updates the game interface dynamically.
+
+The main game flow is:
+
+1. The player enters Fluffville.
+2. The player enters a name.
+3. The player chooses one of five companions.
+4. The player interacts with the selected companion.
+5. The game displays a hangout summary with the play duration and favorite snack.
+6. The player can start another hangout.
+
 # Installation
-[commands]
+[No installation or external package is required.
+
+The project can be downloaded or cloned using Git:
+
+```bash
+git clone <repository-url>
+cd Doremon-
+]
 
 # Run
-[commands]
+[Option 1: Open Directly
+
+Open the following file in a modern web
+browser:
+
+fluffville.html
+
+Option 2: Run Using a Local Server
+
+Start a local Python server from the project
+folder:
+
+python -m http.server 8000
+
+Open the game at:
+
+http://localhost:8000/fluffville.html
+
+The alternate Canvas version is available at:
+http://localhost:8000/fluffville-canvas.html]
 
 ### Project Documentation
 For Software:
+Main Files
+fluffville.html - Main DOM and CSS animation version of the game.
+fluffville-canvas.html - Alternate HTML5 Canvas 2D version.
+README.md - Project documentation.
+Game Screens
+The game contains the following screens:
+
+Welcome screen
+Player name screen
+Companion selection screen
+Interactive gameplay screen
+Hangout summary screen
+
+Companion Characters
+The player can choose from five companions:
+
+Sheep with sweet grass
+Hamster with a blueberry
+Bunny with a carrot
+Kitten with warm milk
+Puppy with a bone
+Each companion has:
+
+A custom inline SVG sprite
+A unique background scene
+A favorite snack
+A different eating animation
+A unique interaction animation
+Character-specific sound behavior
+Sarcastic dialogue
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+![Screenshot1](https://drive.google.com/file/d/1QBm-1YyWz7V1T2cSZZrdHQ09Ho9_Dk4Z/view?usp=sharing)
+*Shows the coverpage*
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+![Screenshot2](https://drive.google.com/file/d/14iIEggYP2bLidLp1fonlOykOQ2SLR2m-/view?usp=sharing)
+*Shows the first page to enter your name*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+![Screenshot3](https://drive.google.com/file/d/19sdWkAk9f-6EJ5st7cU8CR8JYYAfah0b/view?usp=sharing)
+*Shows the next page where you can select your characters*
 
 # Diagrams
 ![Workflow](Add your workflow/architecture diagram here)
@@ -64,20 +139,20 @@ For Software:
 For Hardware:
 
 # Schematic & Circuit
-![Circuit](Add your circuit diagram here)
+![Circuit](None)
 *Add caption explaining connections*
 
-![Schematic](Add your schematic diagram here)
+![Schematic](None)
 *Add caption explaining the schematic*
 
 # Build Photos
-![Components](Add photo of your components here)
+![Components](None)
 *List out all components shown*
 
-![Build](Add photos of build process here)
+![Build](None)
 *Explain the build steps*
 
-![Final](Add photo of final product here)
+![Final](None)
 *Explain the final build*
 
 ### Project Demo
@@ -89,9 +164,8 @@ For Hardware:
 [Add any extra demo materials/links]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- [Angelina Biju]: [Coding, idea implementer]
+- [Anlin Rose Pauly]: [idea giver and moral supporter]
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
