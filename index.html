@@ -1,1 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sadya Control | സദ്യ കൺട്രോൾ</title>
+  <meta name="description" content="Food distribution management system for Kerala Sadya feasts.">
+  <meta name="theme-color" content="#1b4332">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <div class="brand-group">
+        <span class="brand-icon">🍛</span>
+        <div class="brand-title">
+          Sadya Control
+          <span class="brand-malayalam">സദ്യ കൺട്രോൾ</span>
+        </div>
+      </div>
+      <div class="status-badge" title="Running in standalone mode (auto-saved)">
+        <span class="status-dot"></span>
+        <span>Standalone Mode</span>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <nav class="nav-container">
+      <button class="nav-tab active" data-view="volunteer" onclick="switchView('volunteer')">
+        <span>🍲</span> Volunteer View
+      </button>
+      <button class="nav-tab" data-view="dashboard" onclick="switchView('dashboard')">
+        <span>📊</span> Dashboard
+      </button>
+      <button class="nav-tab" data-view="setup" onclick="switchView('setup')">
+        <span>⚙️</span> Setup
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main>
+
+    <!-- 1. VOLUNTEER VIEW -->
+    <section id="view-volunteer" class="view-section active">
+      <div class="volunteer-header-card">
+        <div class="table-selector-row">
+          <button id="btn-prev-table" class="table-nav-btn" onclick="prevTable()" title="Previous Table">◀</button>
+          <div class="table-select-wrapper">
+            <select id="select-table" class="table-select" onchange="onSelectTable(this.value)">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button id="btn-next-table" class="table-nav-btn" onclick="nextTable()" title="Next Table">▶</button>
+        </div>
+
+        <div class="table-status-bar">
+          <div class="table-progress-info">
+            <span id="table-dishes-badge" class="table-progress-pill">0 / 0 Dishes</span>
+            <div class="table-progress-bar-mini">
+              <div id="table-progress-fill" class="table-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="table-quick-actions">
+            <button class="btn-action-small primary" onclick="markCurrentTableAll(true)">✓ Mark All Served</button>
+            <button class="btn-action-small" onclick="markCurrentTableAll(false)">↺ Clear Table</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish Buttons Grid -->
+      <div id="volunteer-dish-grid" class="dish-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section">
+      <!-- 3 Key Summary Stat Cards -->
+      <div class="stats-summary-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🍲</div>
+          <div class="stat-info">
+            <span id="dash-total-servings" class="stat-value">0</span>
+            <span class="stat-label">Total Servings Given</span>
+            <span id="dash-total-capacity" class="stat-sub">Across all tables</span>
+          </div>
+        </div>
+
+        <div class="stat-card gold">
+          <div class="stat-icon">🪑</div>
+          <div class="stat-info">
+            <span id="dash-tables-completed" class="stat-value">0 / 0</span>
+            <span class="stat-label">Tables Fully Served</span>
+            <span id="dash-tables-percent" class="stat-sub">0% of feast tables</span>
+          </div>
+        </div>
+
+        <div class="stat-card accent">
+          <div class="stat-icon">📈</div>
+          <div class="stat-info">
+            <span id="dash-overall-progress" class="stat-value">0%</span>
+            <span class="stat-label">Feast Progress</span>
+            <span id="dash-dishes-status" class="stat-sub">Total coverage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish Remaining Stock & Depletion Bars -->
+      <div class="dashboard-section">
+        <div class="section-header-row">
+          <h2 class="section-title">🥘 Dish Stock & Live Depletion</h2>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">Red warning triggers when remaining stock &le; 15%</span>
+        </div>
+        <div id="dashboard-stock-grid" class="dish-stock-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Full Matrix Grid View -->
+      <div class="dashboard-section">
+        <div class="section-header-row">
+          <h2 class="section-title">📋 Live Table-Dish Matrix</h2>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">Click any cell to toggle status directly</span>
+        </div>
+        <div class="matrix-table-wrapper">
+          <table class="matrix-table">
+            <thead id="matrix-thead">
+              <!-- Populated dynamically -->
+            </thead>
+            <tbody id="matrix-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SETUP VIEW -->
+    <section id="view-setup" class="view-section">
+      <div class="setup-grid">
+
+        <!-- Table Count Configuration -->
+        <div class="setup-card">
+          <h2 class="setup-card-title">🪑 Seating / Tables Setup</h2>
+          <div class="form-group">
+            <label class="form-label" for="input-table-count">Total Number of Tables:</label>
+            <input type="number" id="input-table-count" class="form-input" min="1" max="150" value="20">
+            <div class="table-presets">
+              <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center;">Quick Set:</span>
+              <button class="btn-preset" onclick="setTablePreset(10)">10 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(20)">20 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(30)">30 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(50)">50 Tables</button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveTableConfig()">💾 Save Tables Count</button>
+        </div>
+
+        <!-- Standalone Info Card -->
+        <div class="setup-card">
+          <h2 class="setup-card-title">💾 Offline Auto-Save</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            All data is automatically saved locally in your browser and syncs live across open browser tabs.
+          </p>
+          <div style="background: var(--cream-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--cream-border); font-size: 0.85rem;">
+            ✅ <strong>No setup or internet connection needed</strong>. Simply use it on your device.
+          </div>
+        </div>
+
+        <!-- Menu & Stock Items Management -->
+        <div class="setup-card" style="grid-column: 1 / -1;">
+          <div class="section-header-row" style="margin-bottom: 10px;">
+            <h2 class="setup-card-title" style="margin-bottom: 0;">🍲 Sadya Menu & Prepared Quantities</h2>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary" onclick="loadSadyaPresets()">✨ Load 19 Kerala Dishes</button>
+              <button class="btn-secondary" onclick="addDishRow()">➕ Add Dish</button>
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+            Specify each dish name and the total prepared servings count.
+          </p>
+          <div id="menu-edit-list" class="menu-edit-list">
+            <!-- Dynamic rows -->
+          </div>
+          <button class="btn-primary" onclick="saveMenuConfig()">💾 Save Menu Changes</button>
+        </div>
+
+        <!-- Reset Actions -->
+        <div class="setup-card" style="grid-column: 1 / -1; border-color: #ffc9c9; background: #fffcfc;">
+          <h2 class="setup-card-title" style="color: var(--danger-primary);">⚠️ Event Reset Controls</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Clear recorded feast servings when starting a new round or testing before the event.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-danger" style="flex: 1; min-width: 240px;" onclick="confirmResetServed()">🧹 Clear All Served Data (Keep Menu)</button>
+            <button class="btn-secondary" style="flex: 1; min-width: 240px;" onclick="confirmFactoryReset()">↺ Full Factory Reset</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CONFIRM DIALOG MODAL -->
+  <div id="confirm-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="confirm-modal-title" class="modal-title">Confirm Action</h3>
+        <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <p id="confirm-modal-body" style="font-size: 0.92rem; color: var(--text-main); margin-bottom: 16px;"></p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button id="confirm-modal-btn" class="btn-danger" style="width: auto;" onclick="executeConfirmedAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- JAVASCRIPT -->
+  <script src="app.js"></script>
+</body>
+</html>

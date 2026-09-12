@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sadya Control | സദ്യ കൺട്രോൾ</title>
+  <meta name="description" content="Real-time Kerala Sadya feast food distribution management system.">
+  <meta name="theme-color" content="#1b4332">
+  
+  <!-- Firebase v8 Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <style>
+    /* -------------------------------------------------------------
+       THEME & DESIGN SYSTEM (Warm Kerala / Onam Feast Aesthetic)
+       ------------------------------------------------------------- */
+    :root {
+      --leaf-darkest: #0f2d1e;
+      --leaf-dark: #1b4332;
+      --leaf-primary: #2d6a4f;
+      --leaf-medium: #40916c;
+      --leaf-light: #52b788;
+      --leaf-soft: #d8f3dc;
+      --leaf-tint: #ebf9ef;
+
+      --gold-deep: #b07d12;
+      --gold-primary: #d4a373;
+      --gold-accent: #e5a93b;
+      --gold-light: #fef0cd;
+      --gold-glow: rgba(229, 169, 59, 0.35);
+
+      --cream-bg: #faf7f0;
+      --cream-card: #ffffff;
+      --cream-subtle: #f4ede0;
+      --cream-border: #e6dcce;
+
+      --text-main: #231f1a;
+      --text-muted: #6e6559;
+      --text-light: #9c9183;
+      --text-white: #ffffff;
+
+      --danger-primary: #d90429;
+      --danger-soft: #ffe3e3;
+      --warning-primary: #e8590c;
+      --warning-soft: #fff3bf;
+      --success-primary: #2d6a4f;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 2px 6px rgba(15, 45, 30, 0.06);
+      --shadow-md: 0 6px 18px rgba(15, 45, 30, 0.09);
+      --shadow-lg: 0 12px 32px rgba(15, 45, 30, 0.14);
+
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--cream-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.45;
+      font-size: 15px;
+      padding-bottom: 30px;
+    }
+
+    /* -------------------------------------------------------------
+       HEADER & NAVIGATION
+       ------------------------------------------------------------- */
+    header {
+      background: linear-gradient(135deg, var(--leaf-darkest) 0%, var(--leaf-dark) 100%);
+      color: var(--text-white);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+      border-bottom: 2px solid var(--gold-accent);
+    }
+
+    .header-top {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      font-size: 26px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .brand-malayalam {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold-accent);
+      opacity: 0.95;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .status-badge:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #ffd166;
+    }
+
+    .status-badge.live .status-dot {
+      background-color: #06d6a0;
+      box-shadow: 0 0 8px #06d6a0;
+    }
+
+    .status-badge.offline .status-dot {
+      background-color: #f77f00;
+    }
+
+    /* NAV TABS */
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-tab {
+      flex: 1;
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.75);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 10px 12px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab.active {
+      color: var(--gold-accent);
+      border-bottom-color: var(--gold-accent);
+      background: rgba(255, 255, 255, 0.08);
+      border-top-left-radius: var(--radius-sm);
+      border-top-right-radius: var(--radius-sm);
+    }
+
+    /* -------------------------------------------------------------
+       MAIN APP CONTAINER & VIEWS
+       ------------------------------------------------------------- */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 18px 16px;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* -------------------------------------------------------------
+       VOLUNTEER VIEW
+       ------------------------------------------------------------- */
+    .volunteer-header-card {
+      background: var(--cream-card);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--cream-border);
+      margin-bottom: 18px;
+    }
+
+    .table-selector-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .table-nav-btn {
+      background: var(--cream-subtle);
+      border: 1px solid var(--cream-border);
+      color: var(--leaf-dark);
+      font-size: 1.1rem;
+      font-weight: bold;
+      width: 46px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .table-nav-btn:hover:not(:disabled) {
+      background: var(--leaf-soft);
+      border-color: var(--leaf-primary);
+    }
+
+    .table-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .table-select-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .table-select {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--leaf-darkest);
+      background: var(--cream-bg);
+      border: 2px solid var(--leaf-primary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    .table-select-wrapper::after {
+      content: "▼";
+      font-size: 0.8rem;
+      color: var(--leaf-primary);
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .table-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--cream-border);
+    }
+
+    .table-progress-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .table-progress-pill {
+      background: var(--leaf-soft);
+      color: var(--leaf-darkest);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .table-progress-bar-mini {
+      width: 120px;
+      height: 8px;
+      background: var(--cream-subtle);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .table-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--leaf-light), var(--leaf-primary));
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+    }
+
+    .table-quick-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action-small {
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid var(--cream-border);
+      background: var(--cream-card);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-action-small:hover {
+      background: var(--cream-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-action-small.primary {
+      background: var(--leaf-soft);
+      color: var(--leaf-darkest);
+      border-color: var(--leaf-medium);
+    }
+
+    .btn-action-small.primary:hover {
+      background: var(--leaf-medium);
+      color: #fff;
+    }
+
+    /* VOLUNTEER DISH BUTTONS GRID */
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .dish-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+    }
+
+    .dish-btn {
+      background: var(--cream-card);
+      border: 2px solid var(--cream-border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 68px;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--gold-accent);
+    }
+
+    .dish-btn:active {
+      transform: scale(0.98);
+    }
+
+    .dish-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .dish-checkbox {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--cream-border);
+      background: var(--cream-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      color: transparent;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .dish-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dish-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .dish-stock-info {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* SERVED ACTIVE STATE */
+    .dish-btn.served {
+      background: linear-gradient(135deg, var(--leaf-dark) 0%, var(--leaf-primary) 100%);
+      border-color: var(--leaf-darkest);
+      color: var(--text-white);
+      box-shadow: 0 4px 14px rgba(27, 67, 50, 0.25);
+    }
+
+    .dish-btn.served .dish-title {
+      color: var(--text-white);
+    }
+
+    .dish-btn.served .dish-stock-info {
+      color: var(--leaf-soft);
+    }
+
+    .dish-btn.served .dish-checkbox {
+      background: var(--gold-accent);
+      border-color: #fff;
+      color: var(--leaf-darkest);
+      box-shadow: 0 0 10px var(--gold-glow);
+      transform: scale(1.1);
+    }
+
+    .dish-btn.served::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 6px;
+      height: 100%;
+      background: var(--gold-accent);
+    }
+
+    /* -------------------------------------------------------------
+       DASHBOARD VIEW
+       ------------------------------------------------------------- */
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--cream-card);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      border: 1px solid var(--cream-border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: var(--leaf-primary);
+    }
+
+    .stat-card.gold::before { background: var(--gold-accent); }
+    .stat-card.accent::before { background: var(--leaf-medium); }
+    .stat-card.warning::before { background: var(--warning-primary); }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--leaf-soft);
+      color: var(--leaf-darkest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .stat-card.gold .stat-icon {
+      background: var(--gold-light);
+      color: var(--gold-deep);
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--leaf-darkest);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* DISH STOCK SECTION */
+    .dashboard-section {
+      background: var(--cream-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      border: 1px solid var(--cream-border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 22px;
+    }
+
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--leaf-darkest);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dish-stock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px;
+    }
+
+    .stock-card {
+      background: var(--cream-bg);
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .stock-card.low-stock {
+      border-color: var(--danger-primary);
+      background: #fff8f8;
+      box-shadow: 0 0 10px rgba(217, 4, 41, 0.12);
+    }
+
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .stock-dish-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .stock-badge {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--leaf-soft);
+      color: var(--leaf-darkest);
+    }
+
+    .stock-card.low-stock .stock-badge {
+      background: var(--danger-primary);
+      color: #fff;
+      animation: pulseAlert 1.5s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.04); }
+    }
+
+    .stock-bar-container {
+      width: 100%;
+      height: 9px;
+      background: #e2dbce;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .stock-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, var(--leaf-medium), var(--leaf-primary));
+      transition: width 0.4s ease;
+    }
+
+    .stock-card.low-stock .stock-bar-fill {
+      background: linear-gradient(90deg, var(--warning-primary), var(--danger-primary));
+    }
+
+    .stock-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* FULL MATRIX TABLE */
+    .matrix-table-wrapper {
+      max-height: 480px;
+      overflow: auto;
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius-md);
+      position: relative;
+      background: #fff;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th, 
+    .matrix-table td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid var(--cream-border);
+      border-right: 1px solid var(--cream-border);
+      white-space: nowrap;
+    }
+
+    .matrix-table th {
+      background: var(--leaf-dark);
+      color: #fff;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .matrix-table th.th-table-num {
+      left: 0;
+      z-index: 20;
+      background: var(--leaf-darkest);
+      width: 90px;
+      min-width: 90px;
+    }
+
+    .matrix-table td.td-table-num {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: var(--cream-subtle);
+      font-weight: 700;
+      color: var(--leaf-darkest);
+      text-align: left;
+    }
+
+    .matrix-cell {
+      cursor: pointer;
+      transition: background 0.15s ease;
+      font-weight: 800;
+    }
+
+    .matrix-cell:hover {
+      background: var(--leaf-soft) !important;
+    }
+
+    .matrix-cell.served {
+      background: #e8f5e9;
+      color: var(--leaf-dark);
+    }
+
+    .matrix-cell.unserved {
+      color: #b0a89d;
+    }
+
+    /* -------------------------------------------------------------
+       SETUP VIEW
+       ------------------------------------------------------------- */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    .setup-card {
+      background: var(--cream-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      border: 1px solid var(--cream-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .setup-card-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--leaf-darkest);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--cream-border);
+      background: var(--cream-bg);
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.15s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--leaf-primary);
+      background: #fff;
+    }
+
+    .table-presets {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-preset {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--cream-border);
+      background: var(--cream-subtle);
+      color: var(--leaf-dark);
+      cursor: pointer;
+    }
+
+    .btn-preset:hover {
+      background: var(--leaf-soft);
+      border-color: var(--leaf-primary);
+    }
+
+    .menu-edit-list {
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius-md);
+      padding: 8px;
+      margin-bottom: 14px;
+      background: var(--cream-bg);
+    }
+
+    .menu-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      background: #fff;
+      margin-bottom: 6px;
+      border: 1px solid #ede5d8;
+    }
+
+    .menu-edit-row input[type="text"] {
+      flex: 1;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+    }
+
+    .menu-edit-row input[type="number"] {
+      width: 75px;
+      height: 36px;
+      padding: 0 8px;
+      border: 1px solid var(--cream-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .btn-remove-dish {
+      background: var(--danger-soft);
+      color: var(--danger-primary);
+      border: 1px solid #ffc9c9;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .btn-remove-dish:hover {
+      background: var(--danger-primary);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--leaf-dark) 0%, var(--leaf-primary) 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--leaf-darkest) 0%, var(--leaf-dark) 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--cream-card);
+      color: var(--leaf-dark);
+      font-weight: 700;
+      border: 1.5px solid var(--leaf-primary);
+      border-radius: var(--radius-md);
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background: var(--leaf-soft);
+    }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: var(--danger-primary);
+      border: 1.5px solid #ff8787;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      transition: all 0.15s ease;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-primary);
+      color: #fff;
+    }
+
+    /* -------------------------------------------------------------
+       MODALS & TOASTS
+       ------------------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 45, 30, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--cream-card);
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--gold-accent);
+      animation: modalPop 0.2s ease-out;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--leaf-darkest);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* TOAST NOTIFICATION */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--leaf-darkest);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 4px solid var(--gold-accent);
+      pointer-events: auto;
+      animation: toastIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <div class="brand-group">
+        <span class="brand-icon">🍛</span>
+        <div class="brand-title">
+          Sadya Control
+          <span class="brand-malayalam">സദ്യ കൺട്രോൾ</span>
+        </div>
+      </div>
+      <div id="connection-badge" class="status-badge offline" onclick="openFirebaseConfigModal()" title="Click to configure live Firebase sync">
+        <span class="status-dot"></span>
+        <span id="connection-status-text">Offline Demo Mode</span>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <nav class="nav-container">
+      <button class="nav-tab active" data-view="volunteer" onclick="switchView('volunteer')">
+        <span>🍲</span> Volunteer View
+      </button>
+      <button class="nav-tab" data-view="dashboard" onclick="switchView('dashboard')">
+        <span>📊</span> Dashboard
+      </button>
+      <button class="nav-tab" data-view="setup" onclick="switchView('setup')">
+        <span>⚙️</span> Setup
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main>
+
+    <!-- 1. VOLUNTEER VIEW -->
+    <section id="view-volunteer" class="view-section active">
+      <div class="volunteer-header-card">
+        <div class="table-selector-row">
+          <button id="btn-prev-table" class="table-nav-btn" onclick="prevTable()" title="Previous Table">◀</button>
+          <div class="table-select-wrapper">
+            <select id="select-table" class="table-select" onchange="onSelectTable(this.value)">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <button id="btn-next-table" class="table-nav-btn" onclick="nextTable()" title="Next Table">▶</button>
+        </div>
+
+        <div class="table-status-bar">
+          <div class="table-progress-info">
+            <span id="table-dishes-badge" class="table-progress-pill">0 / 0 Dishes</span>
+            <div class="table-progress-bar-mini">
+              <div id="table-progress-fill" class="table-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="table-quick-actions">
+            <button class="btn-action-small primary" onclick="markCurrentTableAll(true)">✓ Mark All Served</button>
+            <button class="btn-action-small" onclick="markCurrentTableAll(false)">↺ Clear Table</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish Buttons Grid -->
+      <div id="volunteer-dish-grid" class="dish-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section">
+      <!-- 3 Key Summary Stat Cards -->
+      <div class="stats-summary-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🍲</div>
+          <div class="stat-info">
+            <span id="dash-total-servings" class="stat-value">0</span>
+            <span class="stat-label">Total Servings Given</span>
+            <span id="dash-total-capacity" class="stat-sub">Across all tables</span>
+          </div>
+        </div>
+
+        <div class="stat-card gold">
+          <div class="stat-icon">🪑</div>
+          <div class="stat-info">
+            <span id="dash-tables-completed" class="stat-value">0 / 0</span>
+            <span class="stat-label">Tables Fully Served</span>
+            <span id="dash-tables-percent" class="stat-sub">0% of feast tables</span>
+          </div>
+        </div>
+
+        <div class="stat-card accent">
+          <div class="stat-icon">📈</div>
+          <div class="stat-info">
+            <span id="dash-overall-progress" class="stat-value">0%</span>
+            <span class="stat-label">Feast Progress</span>
+            <span id="dash-dishes-status" class="stat-sub">Total coverage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dish Remaining Stock & Depletion Bars -->
+      <div class="dashboard-section">
+        <div class="section-header-row">
+          <h2 class="section-title">🥘 Dish Stock & Live Depletion</h2>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">Red warning triggers when remaining stock &le; 15%</span>
+        </div>
+        <div id="dashboard-stock-grid" class="dish-stock-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Full Matrix Grid View -->
+      <div class="dashboard-section">
+        <div class="section-header-row">
+          <h2 class="section-title">📋 Live Table-Dish Matrix</h2>
+          <span style="font-size: 0.82rem; color: var(--text-muted);">Click any cell to toggle status directly</span>
+        </div>
+        <div class="matrix-table-wrapper">
+          <table class="matrix-table">
+            <thead id="matrix-thead">
+              <!-- Populated dynamically -->
+            </thead>
+            <tbody id="matrix-tbody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SETUP VIEW -->
+    <section id="view-setup" class="view-section">
+      <div class="setup-grid">
+
+        <!-- Table Count Configuration -->
+        <div class="setup-card">
+          <h2 class="setup-card-title">🪑 Seating / Tables Setup</h2>
+          <div class="form-group">
+            <label class="form-label" for="input-table-count">Total Number of Tables:</label>
+            <input type="number" id="input-table-count" class="form-input" min="1" max="150" value="20">
+            <div class="table-presets">
+              <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center;">Quick Set:</span>
+              <button class="btn-preset" onclick="setTablePreset(10)">10 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(20)">20 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(30)">30 Tables</button>
+              <button class="btn-preset" onclick="setTablePreset(50)">50 Tables</button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="saveTableConfig()">💾 Save Tables Count</button>
+        </div>
+
+        <!-- Firebase Cloud Sync Settings -->
+        <div class="setup-card">
+          <h2 class="setup-card-title">☁️ Firebase Realtime Sync</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Connect your Firebase database to sync all volunteer phones in real time during the feast.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-primary" onclick="openFirebaseConfigModal()">⚙️ Configure Firebase Credentials</button>
+            <button class="btn-secondary" onclick="disconnectFirebase()">🔌 Switch to Offline Demo Mode</button>
+          </div>
+        </div>
+
+        <!-- Menu & Stock Items Management -->
+        <div class="setup-card" style="grid-column: 1 / -1;">
+          <div class="section-header-row" style="margin-bottom: 10px;">
+            <h2 class="setup-card-title" style="margin-bottom: 0;">🍲 Sadya Menu & Prepared Quantities</h2>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-secondary" onclick="loadSadyaPresets()">✨ Load 19 Kerala Dishes</button>
+              <button class="btn-secondary" onclick="addDishRow()">➕ Add Dish</button>
+            </div>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+            Specify each dish name and the total prepared servings count.
+          </p>
+          <div id="menu-edit-list" class="menu-edit-list">
+            <!-- Dynamic rows -->
+          </div>
+          <button class="btn-primary" onclick="saveMenuConfig()">💾 Save Menu Changes</button>
+        </div>
+
+        <!-- Reset Actions -->
+        <div class="setup-card" style="grid-column: 1 / -1; border-color: #ffc9c9; background: #fffcfc;">
+          <h2 class="setup-card-title" style="color: var(--danger-primary);">⚠️ Event Reset Controls</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+            Clear recorded feast servings when starting a new round or testing before the event.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-danger" style="flex: 1; min-width: 240px;" onclick="confirmResetServed()">🧹 Clear All Served Data (Keep Menu)</button>
+            <button class="btn-secondary" style="flex: 1; min-width: 240px;" onclick="confirmFactoryReset()">↺ Full Factory Reset</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FIREBASE CONFIG MODAL -->
+  <div id="firebase-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Firebase Realtime Sync</h3>
+        <button class="modal-close" onclick="closeFirebaseConfigModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+        Paste your Firebase configuration values below. All devices connected with this config will sync instantly.
+      </p>
+      <div class="form-group">
+        <label class="form-label" for="cfg-apiKey">API Key:</label>
+        <input type="text" id="cfg-apiKey" class="form-input" placeholder="AIzaSy...">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cfg-dbUrl">Database URL:</label>
+        <input type="text" id="cfg-dbUrl" class="form-input" placeholder="https://your-project-default-rtdb.firebaseio.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cfg-projId">Project ID:</label>
+        <input type="text" id="cfg-projId" class="form-input" placeholder="my-sadya-app">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeFirebaseConfigModal()">Cancel</button>
+        <button class="btn-primary" style="width: auto;" onclick="saveFirebaseCredentials()">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM DIALOG MODAL -->
+  <div id="confirm-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 id="confirm-modal-title" class="modal-title">Confirm Action</h3>
+        <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <p id="confirm-modal-body" style="font-size: 0.92rem; color: var(--text-main); margin-bottom: 16px;"></p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button id="confirm-modal-btn" class="btn-danger" style="width: auto;" onclick="executeConfirmedAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- APPLICATION JAVASCRIPT -->
+  <script>
+    /* -------------------------------------------------------------
+       DEFAULT DATA & STATE
+       ------------------------------------------------------------- */
+    const DEFAULT_SADYA_MENU = {
+      "Rice / ചോറ്": 60,
+      "Parippu & Ghee / പരിപ്പ്": 60,
+      "Sambar / സാമ്പാർ": 60,
+      "Avial / അവിയൽ": 55,
+      "Thoran / തോരൻ": 55,
+      "Olan / ഓലൻ": 50,
+      "Kalan / കാളൻ": 50,
+      "Erissery / എരിശ്ശേരി": 50,
+      "Pachadi (Pineapple) / പച്ചടി": 50,
+      "Kichadi (Cucumber) / കിച്ചടി": 50,
+      "Inji Puli / ഇഞ്ചിപ്പുളി": 60,
+      "Mango Pickle / മാങ്ങ അച്ചാർ": 60,
+      "Papadum / പപ്പടം": 80,
+      "Banana (Poovan) / പൂവൻ പഴം": 60,
+      "Sharkara Varatti & Chips": 60,
+      "Palada Payasam / പാലട": 60,
+      "Parippu Payasam / പരിപ്പ് പായസം": 60,
+      "Rasam / രസം": 55,
+      "Moru (Spiced Buttermilk)": 60
+    };
+
+    let state = {
+      tables: 20,
+      menu: { ...DEFAULT_SADYA_MENU },
+      served: {} // served[tableNum][dishName] = true/false
+    };
+
+    let currentSelectedTable = 1;
+    let activeViewName = 'volunteer';
+    let firebaseDb = null;
+    let isFirebaseLive = false;
+    let pendingConfirmAction = null;
+
+    const STORAGE_KEY_DATA = 'sadya_control_data_v1';
+    const STORAGE_KEY_FIREBASE = 'sadya_control_firebase_cfg_v1';
+
+    /* -------------------------------------------------------------
+       FIREBASE & SYNC ENGINE
+       ------------------------------------------------------------- */
+    function getStoredFirebaseConfig() {
+      try {
+        const cfg = localStorage.getItem(STORAGE_KEY_FIREBASE);
+        return cfg ? JSON.parse(cfg) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function initFirebaseSync() {
+      const cfg = getStoredFirebaseConfig();
+      if (cfg && cfg.apiKey && cfg.databaseURL && typeof firebase !== 'undefined') {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(cfg);
+          }
+          firebaseDb = firebase.database();
+          const rootRef = firebaseDb.ref('sadya');
+
+          // Listen for live updates
+          rootRef.on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val) {
+              state = {
+                tables: Number(val.tables) || 20,
+                menu: val.menu || { ...DEFAULT_SADYA_MENU },
+                served: val.served || {}
+              };
+              localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(state));
+              renderAll();
+            } else {
+              // Remote empty, initialize it
+              syncState(state);
+            }
+          });
+
+          isFirebaseLive = true;
+          updateConnectionStatusUI(true, "Live · Synced");
+          showToast("🟢 Connected to Firebase Realtime Database");
+          return;
+        } catch (err) {
+          console.error("Firebase init error:", err);
+          showToast("⚠️ Firebase connection failed, using local mode");
+        }
+      }
+
+      // Offline / LocalStorage Mode
+      isFirebaseLive = false;
+      updateConnectionStatusUI(false, "Offline Demo Mode");
+      loadLocalState();
+      renderAll();
+    }
+
+    function updateConnectionStatusUI(isLive, label) {
+      const badge = document.getElementById('connection-badge');
+      const text = document.getElementById('connection-status-text');
+      if (isLive) {
+        badge.className = "status-badge live";
+        text.textContent = label || "Live · Synced";
+      } else {
+        badge.className = "status-badge offline";
+        text.textContent = label || "Offline Demo Mode";
+      }
+    }
+
+    function loadLocalState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_DATA);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          state = {
+            tables: Number(parsed.tables) || 20,
+            menu: parsed.menu || { ...DEFAULT_SADYA_MENU },
+            served: parsed.served || {}
+          };
+        }
+      } catch (e) {
+        console.error("Error loading local state:", e);
+      }
+    }
+
+    // Central Write Function
+    function syncState(newState) {
+      state = newState;
+      localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(state));
+
+      if (isFirebaseLive && firebaseDb) {
+        firebaseDb.ref('sadya').set(state).catch((err) => {
+          console.error("Firebase write error:", err);
+          showToast("⚠️ Sync write failed: " + err.message);
+        });
+      }
+
+      renderAll();
+    }
+
+    // Single dish served toggle write
+    function toggleDishServed(tableNum, dishName) {
+      if (!state.served) state.served = {};
+      if (!state.served[tableNum]) state.served[tableNum] = {};
+
+      const current = !!state.served[tableNum][dishName];
+      const next = !current;
+
+      state.served[tableNum][dishName] = next;
+
+      // Haptic feedback for touch devices
+      if (navigator.vibrate) {
+        navigator.vibrate(next ? 35 : 20);
+      }
+
+      syncState(state);
+    }
+
+    // Cross-tab sync for demo mode
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY_DATA && !isFirebaseLive) {
+        loadLocalState();
+        renderAll();
+      }
+    });
+
+    /* -------------------------------------------------------------
+       VIEW ROUTING & NAVIGATION
+       ------------------------------------------------------------- */
+    function switchView(viewName) {
+      activeViewName = viewName;
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById('view-' + viewName);
+      const targetTab = document.querySelector(`.nav-tab[data-view="${viewName}"]`);
+
+      if (targetView) targetView.classList.add('active');
+      if (targetTab) targetTab.classList.add('active');
+
+      renderAll();
+    }
+
+    /* -------------------------------------------------------------
+       CORE RENDERING
+       ------------------------------------------------------------- */
+    function renderAll() {
+      // Clamp current selected table
+      if (currentSelectedTable < 1) currentSelectedTable = 1;
+      if (currentSelectedTable > state.tables) currentSelectedTable = state.tables;
+
+      if (activeViewName === 'volunteer') {
+        renderVolunteerView();
+      } else if (activeViewName === 'dashboard') {
+        renderDashboardView();
+      } else if (activeViewName === 'setup') {
+        renderSetupView();
+      }
+    }
+
+    /* -------------------------------------------------------------
+       VOLUNTEER VIEW LOGIC & RENDERING
+       ------------------------------------------------------------- */
+    function renderVolunteerView() {
+      const select = document.getElementById('select-table');
+      select.innerHTML = '';
+
+      for (let i = 1; i <= state.tables; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        const servedCount = countDishesServedForTable(i);
+        const totalDishes = Object.keys(state.menu).length;
+        opt.textContent = `Table ${i} ${servedCount === totalDishes && totalDishes > 0 ? '✓ (Completed)' : `(${servedCount}/${totalDishes})`}`;
+        if (i === currentSelectedTable) opt.selected = true;
+        select.appendChild(opt);
+      }
+
+      // Prev/Next button states
+      document.getElementById('btn-prev-table').disabled = (currentSelectedTable <= 1);
+      document.getElementById('btn-next-table').disabled = (currentSelectedTable >= state.tables);
+
+      // Table progress info
+      const servedCount = countDishesServedForTable(currentSelectedTable);
+      const totalDishes = Object.keys(state.menu).length;
+      const pct = totalDishes > 0 ? Math.round((servedCount / totalDishes) * 100) : 0;
+
+      document.getElementById('table-dishes-badge').textContent = `${servedCount} / ${totalDishes} Served (${pct}%)`;
+      document.getElementById('table-progress-fill').style.width = `${pct}%`;
+
+      // Dishes Grid
+      const grid = document.getElementById('volunteer-dish-grid');
+      grid.innerHTML = '';
+
+      const dishes = Object.keys(state.menu);
+      const tableServedObj = (state.served && state.served[currentSelectedTable]) || {};
+
+      dishes.forEach(dish => {
+        const isServed = !!tableServedObj[dish];
+        const totalStock = Number(state.menu[dish]) || 0;
+        const totalServedAcrossAllTables = countTotalServedAcrossTables(dish);
+        const remaining = Math.max(0, totalStock - totalServedAcrossAllTables);
+
+        const btn = document.createElement('button');
+        btn.className = `dish-btn ${isServed ? 'served' : ''}`;
+        btn.onclick = () => toggleDishServed(currentSelectedTable, dish);
+
+        btn.innerHTML = `
+          <div class="dish-btn-left">
+            <div class="dish-checkbox">${isServed ? '✓' : ''}</div>
+            <div class="dish-text">
+              <span class="dish-title">${escapeHtml(dish)}</span>
+              <span class="dish-stock-info">
+                <span>Stock left: <strong>${remaining}</strong>/${totalStock}</span>
+              </span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function onSelectTable(val) {
+      currentSelectedTable = Number(val);
+      renderVolunteerView();
+    }
+
+    function prevTable() {
+      if (currentSelectedTable > 1) {
+        currentSelectedTable--;
+        renderVolunteerView();
+      }
+    }
+
+    function nextTable() {
+      if (currentSelectedTable < state.tables) {
+        currentSelectedTable++;
+        renderVolunteerView();
+      }
+    }
+
+    function markCurrentTableAll(isServed) {
+      if (!state.served) state.served = {};
+      if (!state.served[currentSelectedTable]) state.served[currentSelectedTable] = {};
+
+      Object.keys(state.menu).forEach(dish => {
+        state.served[currentSelectedTable][dish] = isServed;
+      });
+
+      syncState(state);
+      showToast(isServed ? `✓ Marked Table ${currentSelectedTable} completely served` : `Cleared Table ${currentSelectedTable}`);
+    }
+
+    /* -------------------------------------------------------------
+       DASHBOARD VIEW LOGIC & RENDERING
+       ------------------------------------------------------------- */
+    function renderDashboardView() {
+      const dishes = Object.keys(state.menu);
+      const totalDishesCount = dishes.length;
+      const totalPossibleServings = state.tables * totalDishesCount;
+
+      // 1. Calculations
+      let totalServingsGiven = 0;
+      let tablesFullyServed = 0;
+
+      for (let t = 1; t <= state.tables; t++) {
+        const tableServed = (state.served && state.served[t]) || {};
+        let tableServedCount = 0;
+        dishes.forEach(d => {
+          if (tableServed[d]) {
+            totalServingsGiven++;
+            tableServedCount++;
+          }
+        });
+        if (tableServedCount === totalDishesCount && totalDishesCount > 0) {
+          tablesFullyServed++;
+        }
+      }
+
+      const overallPercent = totalPossibleServings > 0 ? Math.round((totalServingsGiven / totalPossibleServings) * 100) : 0;
+      const tablePercent = state.tables > 0 ? Math.round((tablesFullyServed / state.tables) * 100) : 0;
+
+      // Update 3 Key Stats
+      document.getElementById('dash-total-servings').textContent = totalServingsGiven.toLocaleString();
+      document.getElementById('dash-total-capacity').textContent = `Out of ${totalPossibleServings} total required`;
+
+      document.getElementById('dash-tables-completed').textContent = `${tablesFullyServed} / ${state.tables}`;
+      document.getElementById('dash-tables-percent').textContent = `${tablePercent}% of all ${state.tables} tables`;
+
+      document.getElementById('dash-overall-progress').textContent = `${overallPercent}%`;
+      document.getElementById('dash-dishes-status').textContent = `${totalServingsGiven} dishes served`;
+
+      // 2. Dish Stock Remaining List
+      const stockGrid = document.getElementById('dashboard-stock-grid');
+      stockGrid.innerHTML = '';
+
+      dishes.forEach(dish => {
+        const totalPrepared = Number(state.menu[dish]) || 0;
+        const servedCount = countTotalServedAcrossTables(dish);
+        const remaining = Math.max(0, totalPrepared - servedCount);
+        const pctRemaining = totalPrepared > 0 ? (remaining / totalPrepared) * 100 : 0;
+        const isLowStock = pctRemaining <= 15 || remaining <= 3;
+
+        const card = document.createElement('div');
+        card.className = `stock-card ${isLowStock ? 'low-stock' : ''}`;
+
+        card.innerHTML = `
+          <div class="stock-header">
+            <span class="stock-dish-name">${escapeHtml(dish)}</span>
+            <span class="stock-badge">${isLowStock ? '⚠️ LOW: ' : ''}${remaining} Left</span>
+          </div>
+          <div class="stock-bar-container">
+            <div class="stock-bar-fill" style="width: ${Math.min(100, pctRemaining)}%;"></div>
+          </div>
+          <div class="stock-meta">
+            <span>Served: <strong>${servedCount}</strong> / Prepared: <strong>${totalPrepared}</strong></span>
+            <span>${Math.round(pctRemaining)}% remaining</span>
+          </div>
+        `;
+        stockGrid.appendChild(card);
+      });
+
+      // 3. Full Matrix Grid Table
+      const thead = document.getElementById('matrix-thead');
+      const tbody = document.getElementById('matrix-tbody');
+
+      let headHtml = '<tr><th class="th-table-num">Table</th>';
+      dishes.forEach(d => {
+        headHtml += `<th title="${escapeHtml(d)}">${escapeHtml(d)}</th>`;
+      });
+      headHtml += '<th>Status</th></tr>';
+      thead.innerHTML = headHtml;
+
+      let bodyHtml = '';
+      for (let t = 1; t <= state.tables; t++) {
+        const tableServed = (state.served && state.served[t]) || {};
+        let servedCountThisTable = 0;
+
+        bodyHtml += `<tr><td class="td-table-num">Table ${t}</td>`;
+
+        dishes.forEach(d => {
+          const isServed = !!tableServed[d];
+          if (isServed) servedCountThisTable++;
+          bodyHtml += `
+            <td class="matrix-cell ${isServed ? 'served' : 'unserved'}" 
+                onclick="toggleDishServed(${t}, '${escapeQuotes(d)}')" 
+                title="Table ${t} - ${escapeHtml(d)}: ${isServed ? 'Served' : 'Not Served'}">
+              ${isServed ? '✓' : '—'}
+            </td>
+          `;
+        });
+
+        const isFull = (servedCountThisTable === totalDishesCount && totalDishesCount > 0);
+        bodyHtml += `
+          <td style="font-weight: 700; color: ${isFull ? 'var(--leaf-dark)' : 'var(--text-muted)'}; background: ${isFull ? 'var(--leaf-soft)' : 'transparent'}">
+            ${isFull ? '✓ Complete' : `${servedCountThisTable}/${totalDishesCount}`}
+          </td>
+        </tr>`;
+      }
+      tbody.innerHTML = bodyHtml;
+    }
+
+    /* -------------------------------------------------------------
+       SETUP VIEW LOGIC & RENDERING
+       ------------------------------------------------------------- */
+    function renderSetupView() {
+      document.getElementById('input-table-count').value = state.tables || 20;
+
+      const editList = document.getElementById('menu-edit-list');
+      editList.innerHTML = '';
+
+      Object.entries(state.menu).forEach(([dish, qty]) => {
+        const row = document.createElement('div');
+        row.className = 'menu-edit-row';
+        row.innerHTML = `
+          <input type="text" class="edit-dish-name" value="${escapeHtml(dish)}" placeholder="Dish name">
+          <input type="number" class="edit-dish-qty" min="1" max="10000" value="${qty}" title="Total prepared servings">
+          <button class="btn-remove-dish" onclick="removeDishRow(this)" title="Remove dish">&times;</button>
+        `;
+        editList.appendChild(row);
+      });
+    }
+
+    function addDishRow(name = '', qty = 60) {
+      const editList = document.getElementById('menu-edit-list');
+      const row = document.createElement('div');
+      row.className = 'menu-edit-row';
+      row.innerHTML = `
+        <input type="text" class="edit-dish-name" value="${escapeHtml(name)}" placeholder="e.g. Parippu Payasam">
+        <input type="number" class="edit-dish-qty" min="1" max="10000" value="${qty}" title="Total prepared servings">
+        <button class="btn-remove-dish" onclick="removeDishRow(this)" title="Remove dish">&times;</button>
+      `;
+      editList.appendChild(row);
+      row.querySelector('input[type="text"]').focus();
+    }
+
+    function removeDishRow(btn) {
+      const row = btn.closest('.menu-edit-row');
+      if (row) row.remove();
+    }
+
+    function setTablePreset(num) {
+      document.getElementById('input-table-count').value = num;
+    }
+
+    function saveTableConfig() {
+      const val = parseInt(document.getElementById('input-table-count').value, 10);
+      if (isNaN(val) || val < 1) {
+        showToast("⚠️ Please enter a valid number of tables (min 1)");
+        return;
+      }
+      state.tables = Math.min(150, val);
+      syncState(state);
+      showToast(`✓ Saved table count: ${state.tables} tables`);
+    }
+
+    function saveMenuConfig() {
+      const rows = document.querySelectorAll('.menu-edit-row');
+      const newMenu = {};
+
+      rows.forEach(row => {
+        const name = row.querySelector('.edit-dish-name').value.trim();
+        const qty = parseInt(row.querySelector('.edit-dish-qty').value, 10) || 50;
+        if (name) {
+          newMenu[name] = qty;
+        }
+      });
+
+      if (Object.keys(newMenu).length === 0) {
+        showToast("⚠️ Menu must contain at least 1 dish");
+        return;
+      }
+
+      state.menu = newMenu;
+      syncState(state);
+      showToast(`✓ Menu updated with ${Object.keys(newMenu).length} dishes`);
+    }
+
+    function loadSadyaPresets() {
+      state.menu = { ...DEFAULT_SADYA_MENU };
+      renderSetupView();
+      showToast("✓ Loaded Kerala Sadya default menu (19 dishes)");
+    }
+
+    /* -------------------------------------------------------------
+       RESET CONTROLS & CONFIRMATION
+       ------------------------------------------------------------- */
+    function confirmResetServed() {
+      openConfirmModal(
+        "Clear All Served Data?",
+        "This will reset all tables to unserved (0 dishes served), but will keep your current table count and menu configuration.",
+        () => {
+          state.served = {};
+          syncState(state);
+          showToast("🧹 All served data has been reset");
+        }
+      );
+    }
+
+    function confirmFactoryReset() {
+      openConfirmModal(
+        "Full Factory Reset?",
+        "This will restore all default settings (20 tables, standard Sadya menu) and wipe all served tracking data.",
+        () => {
+          state = {
+            tables: 20,
+            menu: { ...DEFAULT_SADYA_MENU },
+            served: {}
+          };
+          syncState(state);
+          showToast("↺ Factory reset complete");
+        }
+      );
+    }
+
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirm-modal-title').textContent = title;
+      document.getElementById('confirm-modal-body').textContent = message;
+      pendingConfirmAction = onConfirm;
+      document.getElementById('confirm-modal').classList.add('active');
+    }
+
+    function closeConfirmModal() {
+      pendingConfirmAction = null;
+      document.getElementById('confirm-modal').classList.remove('active');
+    }
+
+    function executeConfirmedAction() {
+      if (typeof pendingConfirmAction === 'function') {
+        pendingConfirmAction();
+      }
+      closeConfirmModal();
+    }
+
+    /* -------------------------------------------------------------
+       FIREBASE CONFIG MODAL & SETUP
+       ------------------------------------------------------------- */
+    function openFirebaseConfigModal() {
+      const cfg = getStoredFirebaseConfig() || {};
+      document.getElementById('cfg-apiKey').value = cfg.apiKey || '';
+      document.getElementById('cfg-dbUrl').value = cfg.databaseURL || '';
+      document.getElementById('cfg-projId').value = cfg.projectId || '';
+      document.getElementById('firebase-modal').classList.add('active');
+    }
+
+    function closeFirebaseConfigModal() {
+      document.getElementById('firebase-modal').classList.remove('active');
+    }
+
+    function saveFirebaseCredentials() {
+      const apiKey = document.getElementById('cfg-apiKey').value.trim();
+      const databaseURL = document.getElementById('cfg-dbUrl').value.trim();
+      const projectId = document.getElementById('cfg-projId').value.trim();
+
+      if (!apiKey || !databaseURL) {
+        showToast("⚠️ Please provide both API Key and Database URL");
+        return;
+      }
+
+      const cfg = { apiKey, databaseURL, projectId };
+      localStorage.setItem(STORAGE_KEY_FIREBASE, JSON.stringify(cfg));
+      closeFirebaseConfigModal();
+      initFirebaseSync();
+    }
+
+    function disconnectFirebase() {
+      localStorage.removeItem(STORAGE_KEY_FIREBASE);
+      isFirebaseLive = false;
+      updateConnectionStatusUI(false, "Offline Demo Mode");
+      showToast("🔌 Disconnected. Running in Offline Demo Mode");
+      renderAll();
+    }
+
+    /* -------------------------------------------------------------
+       UTILITY & HELPER FUNCTIONS
+       ------------------------------------------------------------- */
+    function countDishesServedForTable(tableNum) {
+      if (!state.served || !state.served[tableNum]) return 0;
+      const dishes = Object.keys(state.menu);
+      let count = 0;
+      dishes.forEach(d => {
+        if (state.served[tableNum][d]) count++;
+      });
+      return count;
+    }
+
+    function countTotalServedAcrossTables(dishName) {
+      if (!state.served) return 0;
+      let count = 0;
+      for (let t = 1; t <= state.tables; t++) {
+        if (state.served[t] && state.served[t][dishName]) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = msg;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeQuotes(str) {
+      if (!str) return '';
+      return String(str).replace(/'/g, "\\'");
+    }
+
+    /* -------------------------------------------------------------
+       APP INITIALIZATION
+       ------------------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      initFirebaseSync();
+    });
+  </script>
+</body>
+</html>
